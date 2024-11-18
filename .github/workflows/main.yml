@@ -31,81 +31,84 @@ jobs:
           out_dir: out
     steps:
     - uses: actions/checkout@v1
-    - name: Install coreutils and swig
+    - name: Test architecture
       run: |
-        brew update && brew install coreutils && brew install swig
-      if: matrix.os == 'macos-latest'
-      shell: bash
-    - name: Install Linux tools for LLDB
-      run: |
-        sudo apt-get install build-essential swig python3-dev libedit-dev libncurses5-dev libxml2-dev
-      if: matrix.os == 'ubuntu-22.04'
-    - name: Install Ninja
-      run: |
-        brew install coreutils
-        curl -L -O "https://github.com/ninja-build/ninja/releases/download/v1.11.1/${{ matrix.ninja_file }}" && \
-        echo "${{ matrix.ninja_sha }} ${{ matrix.ninja_file }}" | sha256sum -c && \
-        ${{ matrix.ninja_sudo }} unzip ${{ matrix.ninja_file }} -d ${{ matrix.ninja_dir }} && rm ${{ matrix.ninja_file }}
-      shell: bash
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: 1.79.0
-    - name: Build
-      run: ./build.sh ${{ matrix.out_dir }}
-      shell: bash
-    - name: Upload ${{ matrix.tar }} tarball
-      uses: actions/upload-artifact@v3
-      with:
-        name: platform-tools-${{ matrix.tar }}-${{ matrix.arch }}.tar.bz2
-        path: platform-tools-${{ matrix.tar }}-${{ matrix.arch }}.tar.bz2
-    - name: Upload move-dev ${{ matrix.tar }} tarball
-      uses: actions/upload-artifact@v3
-      with:
-        name: move-dev-${{ matrix.tar }}-${{ matrix.arch }}.tar.bz2
-        path: move-dev-${{ matrix.tar }}-${{ matrix.arch }}.tar.bz2
+        uname -s
+  #   - name: Install coreutils and swig
+  #     run: |
+  #       brew update && brew install coreutils && brew install swig
+  #     if: matrix.os == 'macos-latest'
+  #     shell: bash
+  #   - name: Install Linux tools for LLDB
+  #     run: |
+  #       sudo apt-get install build-essential swig python3-dev libedit-dev libncurses5-dev libxml2-dev
+  #     if: matrix.os == 'ubuntu-22.04'
+  #   - name: Install Ninja
+  #     run: |
+  #       brew install coreutils
+  #       curl -L -O "https://github.com/ninja-build/ninja/releases/download/v1.11.1/${{ matrix.ninja_file }}" && \
+  #       echo "${{ matrix.ninja_sha }} ${{ matrix.ninja_file }}" | sha256sum -c && \
+  #       ${{ matrix.ninja_sudo }} unzip ${{ matrix.ninja_file }} -d ${{ matrix.ninja_dir }} && rm ${{ matrix.ninja_file }}
+  #     shell: bash
+  #   - name: Install Rust
+  #     uses: dtolnay/rust-toolchain@master
+  #     with:
+  #       toolchain: 1.79.0
+  #   - name: Build
+  #     run: ./build.sh ${{ matrix.out_dir }}
+  #     shell: bash
+  #   - name: Upload ${{ matrix.tar }} tarball
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       name: platform-tools-${{ matrix.tar }}-${{ matrix.arch }}.tar.bz2
+  #       path: platform-tools-${{ matrix.tar }}-${{ matrix.arch }}.tar.bz2
+  #   - name: Upload move-dev ${{ matrix.tar }} tarball
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       name: move-dev-${{ matrix.tar }}-${{ matrix.arch }}.tar.bz2
+  #       path: move-dev-${{ matrix.tar }}-${{ matrix.arch }}.tar.bz2
 
-  release:
-    name: Upload Release Assets
-    needs: build
-    runs-on: ubuntu-latest
-    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-    steps:
-    - name: Download macOS tarball
-      uses: actions/download-artifact@v3
-      with:
-        name: platform-tools-osx-x86_64.tar.bz2
-    - name: Download macOS move-dev
-      uses: actions/download-artifact@v3
-      with:
-        name: move-dev-osx-x86_64.tar.bz2
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-    - name: Release macOS tarball
-      id: upload-release-macos
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: platform-tools-osx-x86_64.tar.bz2
-        asset_name: platform-tools-osx-x86_64.tar.bz2
-        asset_content_type: application/zip
-    - name: Release macOS move-dev
-      id: upload-release-macos-move
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: move-dev-osx-x86_64.tar.bz2
-        asset_name: move-dev-osx-x86_64.tar.bz2
-        asset_content_type: application/zip
+  # release:
+  #   name: Upload Release Assets
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+  #   steps:
+  #   - name: Download macOS tarball
+  #     uses: actions/download-artifact@v3
+  #     with:
+  #       name: platform-tools-osx-x86_64.tar.bz2
+  #   - name: Download macOS move-dev
+  #     uses: actions/download-artifact@v3
+  #     with:
+  #       name: move-dev-osx-x86_64.tar.bz2
+  #   - name: Create Release
+  #     id: create_release
+  #     uses: actions/create-release@v1
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     with:
+  #       tag_name: ${{ github.ref }}
+  #       release_name: Release ${{ github.ref }}
+  #       draft: false
+  #       prerelease: false
+  #   - name: Release macOS tarball
+  #     id: upload-release-macos
+  #     uses: actions/upload-release-asset@v1
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     with:
+  #       upload_url: ${{ steps.create_release.outputs.upload_url }}
+  #       asset_path: platform-tools-osx-x86_64.tar.bz2
+  #       asset_name: platform-tools-osx-x86_64.tar.bz2
+  #       asset_content_type: application/zip
+  #   - name: Release macOS move-dev
+  #     id: upload-release-macos-move
+  #     uses: actions/upload-release-asset@v1
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     with:
+  #       upload_url: ${{ steps.create_release.outputs.upload_url }}
+  #       asset_path: move-dev-osx-x86_64.tar.bz2
+  #       asset_name: move-dev-osx-x86_64.tar.bz2
+  #       asset_content_type: application/zip
