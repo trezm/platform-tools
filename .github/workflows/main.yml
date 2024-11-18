@@ -42,7 +42,7 @@ jobs:
       if: matrix.os == 'ubuntu-22.04'
     - name: Install Ninja
       run: |
-        brew install coreutils -y
+        brew install coreutils
         curl -L -O "https://github.com/ninja-build/ninja/releases/download/v1.11.1/${{ matrix.ninja_file }}" && \
         echo "${{ matrix.ninja_sha }} ${{ matrix.ninja_file }}" | sha256sum -c && \
         ${{ matrix.ninja_sudo }} unzip ${{ matrix.ninja_file }} -d ${{ matrix.ninja_dir }} && rm ${{ matrix.ninja_file }}
