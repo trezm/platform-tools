@@ -34,6 +34,7 @@ jobs:
     - name: Test architecture
       run: |
         uname -s
+        uname -m
   #   - name: Install coreutils and swig
   #     run: |
   #       brew update && brew install coreutils && brew install swig
